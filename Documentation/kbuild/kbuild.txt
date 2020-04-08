@@ -232,6 +232,11 @@ These two variables allow to override the user@host string displayed during
 boot and in /proc/version. The default value is the output of the commands
 whoami and host, respectively.
 
+LLVM
+----
+If this variable is set to 1, Kbuild will use Clang and LLVM utilities instead
+of GCC and GNU binutils to build the kernel.
+
 KBUILD_LDS
 --------------------------------------------------
 The linker script with full path. Assigned by the top-level Makefile.
