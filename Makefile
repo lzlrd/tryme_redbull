@@ -837,9 +837,22 @@ KBUILD_CFLAGS	+= -fomit-frame-pointer
 endif
 endif
 
-# Initialize all stack variables with a pattern, if desired.
+# Initialize all stack variables, if desired.
 ifdef CONFIG_INIT_STACK_ALL
+
+# Use pattern initialization by default.
+ifndef CONFIG_USE_CLANG_ZERO_INITIALIZATION
 KBUILD_CFLAGS  += -ftrivial-auto-var-init=pattern
+else
+
+ifdef CONFIG_CC_HAS_AUTO_VAR_ZERO_INIT
+# Future support for zero initialization is still being debated, see
+# https://bugs.llvm.org/show_bug.cgi?id=45497. These flags are subject to being
+# renamed or dropped.
+KBUILD_CFLAGS	+= -ftrivial-auto-var-init=zero -enable-trivial-auto-var-init-zero-knowing-it-will-be-removed-from-clang
+endif
+
+endif
 endif
 
 KBUILD_CFLAGS   += $(call cc-option, -fno-var-tracking-assignments)

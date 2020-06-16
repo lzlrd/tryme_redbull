@@ -22,6 +22,9 @@ menu "Memory initialization"
 config CC_HAS_AUTO_VAR_INIT
 	def_bool $(cc-option,-ftrivial-auto-var-init=pattern)
 
+config CC_HAS_AUTO_VAR_ZERO_INIT
+	def_bool $(cc-option,-ftrivial-auto-var-init=zero -enable-trivial-auto-var-init-zero-knowing-it-will-be-removed-from-clang)
+
 choice
 	prompt "Initialize kernel stack variables at function entry"
 	default GCC_PLUGIN_STRUCTLEAK_BYREF_ALL if COMPILE_TEST && GCC_PLUGINS
@@ -69,6 +72,19 @@ choice
 		  left uninitialized.
 
 endchoice
+
+config USE_CLANG_ZERO_INITIALIZATION
+	bool "Use Clang's zero initialization for local variables"
+	depends on CC_HAS_AUTO_VAR_ZERO_INIT
+	depends on INIT_STACK_ALL
+	help
+	  If set, uses zeros instead of 0xAA to initialize local variables in
+	  INIT_STACK_ALL. Zeroing the stack provides safer defaults for strings,
+	  pointers, indexes, and sizes. The downsides are less-safe defaults for
+	  return values, and exposing fewer bugs where the underlying code
+	  relies on zero initialization.
+	  The corresponding flag isn't officially supported by Clang and may
+	  sooner or later go away or get renamed.
 
 config GCC_PLUGIN_STRUCTLEAK_VERBOSE
 	bool "Report forcefully initialized variables"
