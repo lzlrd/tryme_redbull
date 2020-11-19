@@ -655,7 +655,6 @@ void dump_ssoc_state(struct batt_ssoc_state *ssoc_state, struct logbuffer *log)
 		  ssoc_state->bd_trickle_cnt);
 
 	logbuffer_log(log, "%s", ssoc_state->ssoc_state_cstr);
-	pr_debug("%s\n", ssoc_state->ssoc_state_cstr);
 }
 
 /* ------------------------------------------------------------------------- */
@@ -2320,9 +2319,6 @@ done_no_op:
 	if (!changed)
 		return false;
 
-	pr_info("MSC_HEALTH: now=%d deadline=%d aon_soc=%d ttf=%ld state=%d->%d fv_uv=%d, cc_max=%d\n",
-		now, rest->rest_deadline, rest->always_on_soc,
-		ttf, rest->rest_state, rest_state, fv_uv, cc_max);
 	logbuffer_log(batt_drv->ttf_stats.ttf_log,
 		      "MSC_HEALTH: now=%d deadline=%d aon_soc=%d ttf=%ld state=%d->%d fv_uv=%d, cc_max=%d\n",
 		      now, rest->rest_deadline, rest->always_on_soc,
