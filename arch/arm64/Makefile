@@ -49,6 +49,18 @@ $(warning Detected assembler with broken .inst; disassembly will be unreliable)
   endif
 endif
 
+ifeq ($(CONFIG_ARCH_LITO), y)
+ifeq ($(CONFIG_CC_IS_CLANG), y)
+KBUILD_AFLAGS	+= -mcpu=cortex-a55 -mtune=cortex-a55
+KBUILD_CFLAGS	+= -mcpu=cortex-a55 -mtune=cortex-a55
+KBUILD_LDFLAGS	+= -mllvm -mcpu=cortex-a55
+else ifeq ($(CONFIG_CC_IS_GCC), y)
+# GCC supprots big.LITTLE optimisation.
+KBUILD_AFLAGS	+= -mcpu=cortex-a76.cortex-a55 -mtune=cortex-a75.cortex-a55
+KBUILD_CFLAGS	+= -mcpu=cortex-a76.cortex-a55 -mtune=cortex-a75.cortex-a55
+endif
+endif
+
 ifeq ($(cc-name),clang)
 KBUILD_CFLAGS	+= -mno-implicit-float
 else
