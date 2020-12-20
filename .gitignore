@@ -137,9 +137,11 @@ all.config
 # fetched Android config fragments
 kernel/configs/android-*.cfg
 
-# Object directory
-out/
-
 # Flasher artifacts
 *.img
 builds/
+
+#
+# Object directory
+#
+/out/

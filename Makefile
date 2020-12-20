@@ -119,6 +119,8 @@ ifeq ($(KBUILD_SRC),)
 # Do we want to locate output files in a separate directory?
 ifeq ("$(origin O)", "command line")
   KBUILD_OUTPUT := $(O)
+else
+  KBUILD_OUTPUT := out
 endif
 
 # Cancel implicit rules on top Makefile
@@ -319,7 +321,14 @@ include scripts/subarch.include
 # Alternatively CROSS_COMPILE can be set in the environment.
 # Default value for CROSS_COMPILE is not to prefix executables
 # Note: Some architectures assign CROSS_COMPILE in their arch/*/Makefile
-ARCH		?= $(SUBARCH)
+ARCH		?= arm64
+
+CROSS_COMPILE	?= aarch64-linux-gnu-
+ifneq ($(shell which arm-linux-gnueabi-addr2line 2>/dev/null),)
+	CROSS_COMPILE_COMPAT	?= arm-linux-gnueabi-
+else
+	CROSS_COMPILE_COMPAT	?= arm-none-eabi-
+endif
 
 # Architecture as present in compile.h
 UTS_MACHINE 	:= $(ARCH)
