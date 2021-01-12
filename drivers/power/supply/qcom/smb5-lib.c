@@ -5496,7 +5496,9 @@ int smblib_set_prop_thermal_overheat(struct smb_charger *chg,
 irqreturn_t default_irq_handler(int irq, void *data)
 {
 	struct smb_irq_data *irq_data = data;
+#if IS_ENABLED(CONFIG_GOOGLE_LOGBUFFER)
 	struct smb_charger *chg = irq_data->parent_data;
+#endif
 
 	smblib_dbg(chg, PR_INTERRUPT, "IRQ: %s\n", irq_data->name);
 	return IRQ_HANDLED;
