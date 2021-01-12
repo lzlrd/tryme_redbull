@@ -2215,8 +2215,10 @@ static void sec_ts_read_event(struct sec_ts_data *ts)
 	int curr_pos;
 	int remain_event_count = 0;
 	bool processed_pointer_event = false;
+#if IS_ENABLED(CONFIG_TOUCHSCREEN_HEATMAP)
 	unsigned long last_tid_palm_state = ts->tid_palm_state;
 	unsigned long last_tid_grip_state = ts->tid_grip_state;
+#endif
 #if IS_ENABLED(CONFIG_TOUCHSCREEN_OFFLOAD)
 	struct touch_offload_frame *frame = NULL;
 #endif
