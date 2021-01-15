@@ -725,6 +725,22 @@ KBUILD_CFLAGS	+= $(call cc-disable-warning,maybe-uninitialized,)
 endif
 endif
 
+ifdef CONFIG_INLINE_OPTIMIZATION
+ifdef CONFIG_CC_IS_CLANG
+KBUILD_CFLAGS	+= -mllvm -inline-threshold=600
+KBUILD_CFLAGS	+= -mllvm -inlinehint-threshold=750
+else ifdef CONFIG_CC_IS_GCC
+KBUILD_CFLAGS	+= --param max-inline-insns-single=600
+KBUILD_CFLAGS	+= --param max-inline-insns-auto=750
+
+# We limit inlining to 5KB on the stack.
+KBUILD_CFLAGS	+= --param large-stack-frame=12288
+
+KBUILD_CFLAGS	+= --param inline-min-speedup=5
+KBUILD_CFLAGS	+= --param inline-unit-growth=60
+endif
+endif
+
 KBUILD_CFLAGS += $(call cc-ifversion, -lt, 0409, \
 			$(call cc-disable-warning,maybe-uninitialized,))
 
