@@ -28,11 +28,11 @@
 #include <net/protocol.h>
 #include <net/netevent.h>
 
-static int zero;
-static int one = 1;
-static int two = 2;
-static int four = 4;
-static int thousand = 1000;
+static const int zero;
+static const int one = 1;
+static const int two = 2;
+static const int four = 4;
+static const int thousand = 1000;
 static int gso_max_segs = GSO_MAX_SEGS;
 static int tcp_retr1_max = 255;
 static int ip_local_port_range_min[] = { 1, 1 };
@@ -539,7 +539,7 @@ static struct ctl_table ipv4_table[] = {
 		.maxlen		= sizeof(int),
 		.mode		= 0644,
 		.proc_handler	= proc_dointvec_minmax,
-		.extra1		= &zero,
+		.extra1		= (int *)&zero,
 	},
 	{
 		.procname	= "icmp_msgs_burst",
@@ -547,7 +547,7 @@ static struct ctl_table ipv4_table[] = {
 		.maxlen		= sizeof(int),
 		.mode		= 0644,
 		.proc_handler	= proc_dointvec_minmax,
-		.extra1		= &zero,
+		.extra1		= (int *)&zero,
 	},
 	{
 		.procname	= "udp_mem",
@@ -720,8 +720,8 @@ static struct ctl_table ipv4_net_table[] = {
 		.maxlen		= sizeof(int),
 		.mode		= 0644,
 		.proc_handler   = ipv4_fwd_update_priority,
-		.extra1		= &zero,
-		.extra2		= &one,
+		.extra1		= (int *)&zero,
+		.extra2		= (int *) (int *)&one,
 	},
 	{
 		.procname	= "ip_nonlocal_bind",
@@ -751,8 +751,8 @@ static struct ctl_table ipv4_net_table[] = {
 		.maxlen		= sizeof(int),
 		.mode		= 0644,
 		.proc_handler	= proc_dointvec_minmax,
-		.extra1		= &zero,
-		.extra2		= &one,
+		.extra1		= (int *)&zero,
+		.extra2		= (int *) (int *)&one,
 	},
 #endif
 	{
@@ -821,7 +821,7 @@ static struct ctl_table ipv4_net_table[] = {
 		.maxlen		= sizeof(int),
 		.mode		= 0644,
 		.proc_handler	= proc_dointvec_minmax,
-		.extra1		= &one
+		.extra1		= (int *)&one
 	},
 #endif
 	{
@@ -926,8 +926,8 @@ static struct ctl_table ipv4_net_table[] = {
 		.maxlen		= sizeof(int),
 		.mode		= 0644,
 		.proc_handler	= proc_dointvec_minmax,
-		.extra1		= &zero,
-		.extra2		= &two,
+		.extra1		= (int *)&zero,
+		.extra2		= (int *)&two,
 	},
 	{
 		.procname	= "tcp_max_tw_buckets",
@@ -963,7 +963,7 @@ static struct ctl_table ipv4_net_table[] = {
 		.maxlen		= sizeof(int),
 		.mode		= 0644,
 		.proc_handler	= proc_tfo_blackhole_detect_timeout,
-		.extra1		= &zero,
+		.extra1		= (int *)&zero,
 	},
 #ifdef CONFIG_IP_ROUTE_MULTIPATH
 	{
@@ -972,8 +972,8 @@ static struct ctl_table ipv4_net_table[] = {
 		.maxlen		= sizeof(int),
 		.mode		= 0644,
 		.proc_handler	= proc_dointvec_minmax,
-		.extra1		= &zero,
-		.extra2		= &one,
+		.extra1		= (int *)&zero,
+		.extra2		= (int *) (int *)&one,
 	},
 	{
 		.procname	= "fib_multipath_hash_policy",
@@ -981,8 +981,8 @@ static struct ctl_table ipv4_net_table[] = {
 		.maxlen		= sizeof(int),
 		.mode		= 0644,
 		.proc_handler	= proc_fib_multipath_hash_policy,
-		.extra1		= &zero,
-		.extra2		= &one,
+		.extra1		= (int *)&zero,
+		.extra2		= (int *) (int *)&one,
 	},
 #endif
 	{
@@ -999,8 +999,8 @@ static struct ctl_table ipv4_net_table[] = {
 		.maxlen		= sizeof(int),
 		.mode		= 0644,
 		.proc_handler	= proc_dointvec_minmax,
-		.extra1		= &zero,
-		.extra2		= &one,
+		.extra1		= (int *)&zero,
+		.extra2		= (int *) (int *)&one,
 	},
 #endif
 	{
@@ -1030,8 +1030,8 @@ static struct ctl_table ipv4_net_table[] = {
 		.maxlen		= sizeof(int),
 		.mode		= 0644,
 		.proc_handler	= proc_dointvec_minmax,
-		.extra1		= &zero,
-		.extra2		= &four,
+		.extra1		= (int *)&zero,
+		.extra2		= (int *)&four,
 	},
 	{
 		.procname	= "tcp_recovery",
@@ -1174,7 +1174,7 @@ static struct ctl_table ipv4_net_table[] = {
 		.maxlen		= sizeof(int),
 		.mode		= 0644,
 		.proc_handler	= proc_dointvec_minmax,
-		.extra1		= &one,
+		.extra1		= (int *) (int *)&one,
 		.extra2		= &gso_max_segs,
 	},
 	{
@@ -1183,8 +1183,8 @@ static struct ctl_table ipv4_net_table[] = {
 		.maxlen		= sizeof(int),
 		.mode		= 0644,
 		.proc_handler	= proc_dointvec_minmax,
-		.extra1		= &zero,
-		.extra2		= &one_day_secs
+		.extra1		= (int *)&zero,
+		.extra2		= (int *)&one_day_secs
 	},
 	{
 		.procname	= "tcp_autocorking",
@@ -1192,8 +1192,8 @@ static struct ctl_table ipv4_net_table[] = {
 		.maxlen		= sizeof(int),
 		.mode		= 0644,
 		.proc_handler	= proc_dointvec_minmax,
-		.extra1		= &zero,
-		.extra2		= &one,
+		.extra1		= (int *)&zero,
+		.extra2		= (int *) (int *)&one,
 	},
 	{
 		.procname	= "tcp_invalid_ratelimit",
@@ -1208,8 +1208,8 @@ static struct ctl_table ipv4_net_table[] = {
 		.maxlen		= sizeof(int),
 		.mode		= 0644,
 		.proc_handler	= proc_dointvec_minmax,
-		.extra1		= &zero,
-		.extra2		= &thousand,
+		.extra1		= (int *)&zero,
+		.extra2		= (int *)&thousand,
 	},
 	{
 		.procname	= "tcp_pacing_ca_ratio",
@@ -1217,8 +1217,8 @@ static struct ctl_table ipv4_net_table[] = {
 		.maxlen		= sizeof(int),
 		.mode		= 0644,
 		.proc_handler	= proc_dointvec_minmax,
-		.extra1		= &zero,
-		.extra2		= &thousand,
+		.extra1		= (int *)&zero,
+		.extra2		= (int *)&thousand,
 	},
 	{
 		.procname	= "tcp_wmem",
@@ -1226,7 +1226,7 @@ static struct ctl_table ipv4_net_table[] = {
 		.maxlen		= sizeof(init_net.ipv4.sysctl_tcp_wmem),
 		.mode		= 0644,
 		.proc_handler	= proc_dointvec_minmax,
-		.extra1		= &one,
+		.extra1		= (int *) (int *)&one,
 	},
 	{
 		.procname	= "tcp_rmem",
@@ -1234,7 +1234,7 @@ static struct ctl_table ipv4_net_table[] = {
 		.maxlen		= sizeof(init_net.ipv4.sysctl_tcp_rmem),
 		.mode		= 0644,
 		.proc_handler	= proc_dointvec_minmax,
-		.extra1		= &one,
+		.extra1		= (int *) (int *)&one,
 	},
 	{
 		.procname	= "tcp_comp_sack_delay_ns",
@@ -1249,7 +1249,7 @@ static struct ctl_table ipv4_net_table[] = {
 		.maxlen		= sizeof(int),
 		.mode		= 0644,
 		.proc_handler	= proc_dointvec_minmax,
-		.extra1		= &zero,
+		.extra1		= (int *)&zero,
 		.extra2		= &comp_sack_nr_max,
 	},
 	{
@@ -1258,7 +1258,7 @@ static struct ctl_table ipv4_net_table[] = {
 		.maxlen		= sizeof(init_net.ipv4.sysctl_udp_rmem_min),
 		.mode		= 0644,
 		.proc_handler	= proc_dointvec_minmax,
-		.extra1		= &one
+		.extra1		= (int *)&one
 	},
 	{
 		.procname	= "udp_wmem_min",
@@ -1266,7 +1266,7 @@ static struct ctl_table ipv4_net_table[] = {
 		.maxlen		= sizeof(init_net.ipv4.sysctl_udp_wmem_min),
 		.mode		= 0644,
 		.proc_handler	= proc_dointvec_minmax,
-		.extra1		= &one
+		.extra1		= (int *)&one
 	},
 	{ }
 };

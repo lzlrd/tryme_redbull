@@ -22,9 +22,9 @@
 #include <net/busy_poll.h>
 #include <net/pkt_sched.h>
 
-static int zero = 0;
-static int one = 1;
-static int two __maybe_unused = 2;
+static const int zero = 0;
+static const int one = 1;
+static const int two __maybe_unused = 2;
 static int min_sndbuf = SOCK_MIN_SNDBUF;
 static int min_rcvbuf = SOCK_MIN_RCVBUF;
 static int max_skb_frags = MAX_SKB_FRAGS;
@@ -383,11 +383,11 @@ static struct ctl_table net_core_table[] = {
 		.mode		= 0644,
 		.proc_handler	= proc_dointvec_minmax_bpf_enable,
 # ifdef CONFIG_BPF_JIT_ALWAYS_ON
-		.extra1		= &one,
-		.extra2		= &one,
+		.extra1		= (int *)&one,
+		.extra2		= (int *)&one,
 # else
-		.extra1		= &zero,
-		.extra2		= &two,
+		.extra1		= (int *)&zero,
+		.extra2		= (int *)&two,
 # endif
 	},
 # ifdef CONFIG_HAVE_EBPF_JIT
@@ -397,8 +397,8 @@ static struct ctl_table net_core_table[] = {
 		.maxlen		= sizeof(int),
 		.mode		= 0600,
 		.proc_handler	= proc_dointvec_minmax_bpf_restricted,
-		.extra1		= &zero,
-		.extra2		= &two,
+		.extra1		= (int *)&zero,
+		.extra2		= (int *)&two,
 	},
 	{
 		.procname	= "bpf_jit_kallsyms",
@@ -406,8 +406,8 @@ static struct ctl_table net_core_table[] = {
 		.maxlen		= sizeof(int),
 		.mode		= 0600,
 		.proc_handler	= proc_dointvec_minmax_bpf_restricted,
-		.extra1		= &zero,
-		.extra2		= &one,
+		.extra1		= (int *)&zero,
+		.extra2		= (int *)&one,
 	},
 # endif
 	{
@@ -454,8 +454,8 @@ static struct ctl_table net_core_table[] = {
 		.maxlen		= sizeof(int),
 		.mode		= 0644,
 		.proc_handler	= proc_dointvec_minmax,
-		.extra1		= &zero,
-		.extra2		= &one
+		.extra1		= (int *)&zero,
+		.extra2		= (int *)&one
 	},
 #ifdef CONFIG_RPS
 	{
@@ -486,7 +486,7 @@ static struct ctl_table net_core_table[] = {
 		.maxlen		= sizeof(unsigned int),
 		.mode		= 0644,
 		.proc_handler	= proc_dointvec_minmax,
-		.extra1		= &zero,
+		.extra1		= (int *)&zero,
 	},
 	{
 		.procname	= "busy_read",
@@ -494,7 +494,7 @@ static struct ctl_table net_core_table[] = {
 		.maxlen		= sizeof(unsigned int),
 		.mode		= 0644,
 		.proc_handler	= proc_dointvec_minmax,
-		.extra1		= &zero,
+		.extra1		= (int *)&zero,
 	},
 #endif
 #ifdef CONFIG_NET_SCHED
@@ -526,7 +526,7 @@ static struct ctl_table net_core_table[] = {
 		.maxlen		= sizeof(int),
 		.mode		= 0644,
 		.proc_handler	= proc_dointvec_minmax,
-		.extra1		= &one,
+		.extra1		= (int *)&one,
 		.extra2		= &max_skb_frags,
 	},
 	{
@@ -535,7 +535,7 @@ static struct ctl_table net_core_table[] = {
 		.maxlen		= sizeof(unsigned int),
 		.mode		= 0644,
 		.proc_handler	= proc_dointvec_minmax,
-		.extra1		= &zero,
+		.extra1		= (int *)&zero,
 	},
 	{
 		.procname	= "fb_tunnels_only_for_init_net",
@@ -543,8 +543,8 @@ static struct ctl_table net_core_table[] = {
 		.maxlen		= sizeof(int),
 		.mode		= 0644,
 		.proc_handler	= proc_dointvec_minmax,
-		.extra1		= &zero,
-		.extra2		= &one,
+		.extra1		= (int *)&zero,
+		.extra2		= (int *)&one,
 	},
 	{ }
 };
@@ -555,7 +555,7 @@ static struct ctl_table netns_core_table[] = {
 		.data		= &init_net.core.sysctl_somaxconn,
 		.maxlen		= sizeof(int),
 		.mode		= 0644,
-		.extra1		= &zero,
+		.extra1		= (int *)&zero,
 		.proc_handler	= proc_dointvec_minmax
 	},
 	{ }
