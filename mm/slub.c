@@ -3932,7 +3932,8 @@ static size_t __ksize(const void *object)
 	page = virt_to_head_page(object);
 
 	if (unlikely(!PageSlab(page))) {
-		WARN_ON(!PageCompound(page));
+		CHECK_DATA_CORRUPTION(!PageCompound(page),
+				      "abuse of ksize() detected, bailing out");
 		return PAGE_SIZE << compound_order(page);
 	}
 
