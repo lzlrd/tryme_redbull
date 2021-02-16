@@ -278,5 +278,16 @@ config DEFAULT_SECURITY
 
 source "security/Kconfig.hardening"
 
+config SECURITY_RTIC
+	bool "RunTime Integrity Check feature"
+	depends on ARM64
+	help
+	  RTIC(RunTime Integrity Check) feature is to protect Linux kernel
+	  at runtime. This relocates some of the security sensitive kernel
+	  structures to a separate RTIC specific page.
+
+	  This is to enable monitoring and protection of these kernel assets
+	  from a higher exception level(EL) against any unauthorized changes.
+
 endmenu
 

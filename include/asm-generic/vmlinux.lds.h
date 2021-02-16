@@ -642,6 +642,15 @@
 		*(.scommon)						\
 	}
 
+#ifdef CONFIG_SECURITY_RTIC
+#define RTIC_BSS							\
+	. = ALIGN(SZ_2M);						\
+	KEEP(*(.bss.rtic))						\
+	. = ALIGN(SZ_2M);
+#else
+#define RTIC_BSS
+#endif
+
 /*
  * Allow archectures to redefine BSS_FIRST_SECTIONS to add extra
  * sections to the front of bss.

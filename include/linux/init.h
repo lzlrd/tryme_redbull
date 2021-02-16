@@ -322,6 +322,12 @@ void __init parse_early_options(char *cmdline);
 /* Data marked not to be saved by software suspend */
 #define __nosavedata __section(.data..nosave)
 
+#ifdef CONFIG_SECURITY_RTIC
+#define __rticdata  __section(".bss.rtic")
+#else
+#define __rticdata
+#endif
+
 #ifdef MODULE
 #define __exit_p(x) x
 #else
