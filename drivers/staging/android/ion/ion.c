@@ -557,6 +557,7 @@ void ion_device_add_heap(struct ion_device *idev, struct ion_heap *heap)
 
 	down_write(&idev->heap_rwsem);
 	plist_add(&heap->node, &idev->heaps);
+	idev->heap_cnt++;
 	up_write(&idev->heap_rwsem);
 }
 
@@ -579,10 +580,53 @@ static int ion_walk_heaps(int heap_id, int type, void *data,
 	return ret;
 }
 
+static int ion_query_heaps(struct ion_heap_query *query)
+{
+	struct ion_heap_data __user *buffer = u64_to_user_ptr(query->heaps);
+	struct ion_device *idev = &ion_dev;
+	struct ion_heap_data hdata;
+	struct ion_heap *heap;
+	int cnt = 0, ret = 0;
+
+	if (!buffer) {
+		query->cnt = idev->heap_cnt;
+		return ret;
+	}
+
+	if (query->cnt <= 0)
+		return -EINVAL;
+
+	memset(&hdata, 0, sizeof(hdata));
+
+	down_read(&idev->heap_rwsem);
+	plist_for_each_entry(heap, &idev->heaps, node) {
+		strlcpy(hdata.name, heap->name, sizeof(hdata.name));
+		hdata.name[sizeof(hdata.name) - 1] = '\0';
+		hdata.type = heap->type;
+		hdata.heap_id = heap->id;
+
+		if (copy_to_user(&buffer[cnt], &hdata, sizeof(hdata))) {
+			ret = -EFAULT;
+			break;
+		}
+
+		cnt++;
+		if (cnt >= query->cnt)
+			break;
+	}
+	up_read(&idev->heap_rwsem);
+
+	if (ret != -EFAULT)
+		query->cnt = cnt;
+
+	return ret;
+}
+
 static long ion_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 {
 	union {
 		struct ion_allocation_data allocation;
+		struct ion_heap_query query;
 		struct ion_prefetch_data prefetch_data;
 	} data;
 	int fd, *output;
@@ -612,6 +656,13 @@ static long ion_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 				      ION_HEAP_TYPE_SYSTEM_SECURE,
 				      &data.prefetch_data,
 				      ion_system_secure_heap_drain);
+	case ION_IOC_HEAP_QUERY:
+		if (data.query.reserved0 ||
+		    data.query.reserved1 ||
+		    data.query.reserved2)
+			return -EINVAL;
+		else
+			return ion_query_heaps(&data.query);
 	default:
 		return -ENOTTY;
 	}
