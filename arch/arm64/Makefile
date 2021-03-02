@@ -146,9 +146,12 @@ endif
 
 KBUILD_DTBS	:= dtbs
 
-KBUILD_DTBO_IMG := dtbo.img
-KBUILD_DTBO_IMG += dtbo_bramble.img
-KBUILD_DTBO_IMG += dtbo_redfin.img
+ifeq ($(CONFIG_BOARD_BRAMBLE),y)
+KBUILD_DTBO_IMG := dtbo_bramble.img
+endif
+ifeq ($(CONFIG_BOARD_REDFIN),y)
+KBUILD_DTBO_IMG := dtbo_redfin.img
+endif
 
 ifeq ($(CONFIG_BUILD_ARM64_DT_OVERLAY),y)
 export DTC_FLAGS := -@
