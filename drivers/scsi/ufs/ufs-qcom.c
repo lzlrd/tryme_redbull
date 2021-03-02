@@ -2683,7 +2683,6 @@ static void ufs_qcom_dump_dbg_regs(struct ufs_hba *hba, bool no_sleep)
 		return;
 
 	/* sleep a bit intermittently as we are dumping too much data */
-	usleep_range(1000, 1100);
 	udelay(1000);
 	ufs_qcom_testbus_read(hba);
 	udelay(1000);

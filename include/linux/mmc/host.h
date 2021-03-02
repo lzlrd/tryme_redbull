@@ -610,9 +610,6 @@ struct mmc_host {
 	int			cqe_qdepth;
 	bool			cqe_enabled;
 	bool			cqe_on;
-#ifdef CONFIG_MMC_CRYPTO
-	struct keyslot_manager	*ksm;
-#endif /* CONFIG_MMC_CRYPTO */
 
 	/*
 	 * Set to 1 to just stop the SDCLK to the card without

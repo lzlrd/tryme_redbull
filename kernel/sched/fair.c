@@ -6294,8 +6294,8 @@ stune_util(int cpu, unsigned long other_util,
 
 	return util + margin;
 }
-#endif
 
+#endif
 #else /* CONFIG_SCHED_TUNE */
 
 inline long
@@ -7082,10 +7082,6 @@ static int get_start_cpu(struct task_struct *p, bool sync_boost)
 			rd->max_cap_orig_cpu : rd->mid_cap_orig_cpu;
 	}
 
-	if (start_cpu == rd->mid_cap_orig_cpu &&
-			!task_demand_fits(p, start_cpu))
-		start_cpu = rd->max_cap_orig_cpu;
-
 	return start_cpu;
 }
 
@@ -7116,6 +7112,7 @@ static void find_best_target(struct sched_domain *sd, cpumask_t *cpus,
 	struct sched_group *sg;
 	int best_active_cpu = -1;
 	int best_idle_cpu = -1;
+	bool idle_fit_cpu_found = false;
 	int best_prioritized_cpu = -1;
 	int target_cpu = -1;
 	int backup_cpu = -1;
@@ -7240,11 +7237,19 @@ static void find_best_target(struct sched_domain *sd, cpumask_t *cpus,
 				prioritized_task && !is_min_capacity_cpu(i) &&
 				per_cpu(prioritized_task_nr, i) == 0;
 
-			if ((!(prefer_idle && idle_cpu(i)) &&
-			     !best_prioritized_candidate &&
-			     new_util > capacity_orig) ||
-			    (is_min_capacity_cpu(i) &&
-			     !task_fits_capacity(p, capacity_orig, i)))
+			if (!(prefer_idle && idle_cpu(i)) &&
+			    !best_prioritized_candidate &&
+			    new_util > capacity_orig)
+				continue;
+
+			/*
+			 * If start cpu is mid core, we don't want to loop
+			 * back to little cores, unless the task prefers
+			 * idle cpu and could not find one in mid/max core.
+			 */
+			if (!(prefer_idle && idle_fit_cpu_found == false) &&
+			    is_min_capacity_cpu(i) &&
+			    !task_fits_capacity(p, capacity_orig, i))
 				continue;
 
 			/*
@@ -7332,6 +7337,11 @@ static void find_best_target(struct sched_domain *sd, cpumask_t *cpus,
 					target_capacity = capacity_orig;
 					shallowest_idle_cstate = idle_idx;
 					best_idle_util = new_util;
+
+					if (is_min_capacity_cpu(start_cpu) ==
+					    is_min_capacity_cpu(i))
+						idle_fit_cpu_found = true;
+
 					best_idle_cpu = i;
 					continue;
 				}
@@ -11629,7 +11639,12 @@ static void kick_ilb(unsigned int flags)
 {
 	int ilb_cpu;
 
-	nohz.next_balance++;
+	/*
+	 * Increase nohz.next_balance only when if full ilb is triggered but
+	 * not if we only update stats.
+	 */
+	if (flags & NOHZ_BALANCE_KICK)
+		nohz.next_balance = jiffies+1;
 
 	ilb_cpu = find_new_ilb();
 
@@ -11942,6 +11957,14 @@ static bool _nohz_idle_balance(struct rq *this_rq, unsigned int flags,
 		}
 	}
 
+	/*
+	 * next_balance will be updated only when there is a need.
+	 * When the CPU is attached to null domain for ex, it will not be
+	 * updated.
+	 */
+	if (likely(update_next_balance))
+		nohz.next_balance = next_balance;
+
 	/* Newly idle CPU doesn't need an update */
 	if (idle != CPU_NEWLY_IDLE) {
 		update_blocked_averages(this_cpu);
@@ -11961,14 +11984,6 @@ abort:
 	/* There is still blocked load, enable periodic update */
 	if (has_blocked_load)
 		WRITE_ONCE(nohz.has_blocked, 1);
-
-	/*
-	 * next_balance will be updated only when there is a need.
-	 * When the CPU is attached to null domain for ex, it will not be
-	 * updated.
-	 */
-	if (likely(update_next_balance))
-		nohz.next_balance = next_balance;
 
 	return ret;
 }

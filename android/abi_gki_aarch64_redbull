@@ -41,6 +41,7 @@
   bus_for_each_dev
   bus_register
   bus_unregister
+  call_rcu
   cancel_delayed_work
   cancel_delayed_work_sync
   cancel_work_sync
@@ -94,6 +95,7 @@
   contig_page_data
   _copy_from_iter_full
   cpu_bit_bitmap
+  __cpuhp_remove_state
   __cpuhp_setup_state
   cpu_hwcap_keys
   cpu_hwcaps
@@ -101,6 +103,7 @@
   cpumask_next
   cpu_number
   __cpu_online_mask
+  cpu_pm_register_notifier
   __cpu_possible_mask
   cpus_read_lock
   cpus_read_unlock
@@ -466,6 +469,7 @@
   __ll_sc_atomic64_fetch_or
   __ll_sc_atomic64_or
   __ll_sc_atomic64_sub
+  __ll_sc_atomic64_sub_return
   __ll_sc_atomic_add
   __ll_sc_atomic_add_return
   __ll_sc_atomic_sub
@@ -490,6 +494,10 @@
   __memcpy_toio
   memdup_user
   memmove
+  mempool_alloc
+  mempool_free
+  mempool_kfree
+  mempool_kmalloc
   memremap
   memset
   __memset_io
@@ -505,6 +513,7 @@
   module_put
   __msecs_to_jiffies
   msleep
+  msleep_interruptible
   __mutex_init
   mutex_lock
   mutex_lock_interruptible
@@ -1209,14 +1218,23 @@
   crc_ccitt_table
   kernel_restart
   kernel_setsockopt
-  mempool_alloc
   mempool_create
   mempool_destroy
-  mempool_free
-  mempool_kfree
-  mempool_kmalloc
   send_sig_info
   time64_to_tm
+
+# required by dm-user.ko
+  bio_advance
+  bio_endio
+  bio_put
+  _copy_from_iter
+  copy_page_from_iter
+  copy_page_to_iter
+  _copy_to_iter
+  dm_register_target
+  dm_unregister_target
+  mempool_exit
+  mempool_init
 
 # required by dwc3-haps.ko
   pcim_enable_device
@@ -1358,7 +1376,6 @@
   __break_lease
   clear_inode
   __close_fd
-  crc32_le
   d_add
   d_drop
   deactivate_locked_super
@@ -1366,6 +1383,8 @@
   dget_parent
   d_instantiate
   d_make_root
+  down_read_killable
+  down_write_killable
   dput
   flush_dcache_page
   fs_kobj
@@ -1395,11 +1414,13 @@
   match_token
   noop_llseek
   notify_change
+  override_creds
   pagecache_get_page
   path_get
   path_put
   __put_cred
   register_filesystem
+  revert_creds
   set_anon_super
   sget
   simple_getattr
@@ -1415,6 +1436,7 @@
   user_path_at_empty
   vfs_create
   vfs_fallocate
+  vfs_fsync
   vfs_getattr
   vfs_getxattr
   vfs_link
@@ -1424,12 +1446,14 @@
   vfs_rmdir
   vfs_setxattr
   vfs_unlink
+  ZSTD_decompressStream
+  ZSTD_DStreamWorkspaceBound
+  ZSTD_initDStream
 
 # required by ion-alloc.ko
   dma_buf_export
   dma_get_device_base
   dma_get_size
-  __ll_sc_atomic64_sub_return
   mm_event_count
   __next_zones_zonelist
   ptr_to_hashval
@@ -2114,6 +2138,7 @@
 # required by qrtr.ko
   alloc_skb_with_frags
   datagram_poll
+  idr_alloc_u32
   in_egroup_p
   netlink_capable
   __radix_tree_insert
@@ -2217,7 +2242,6 @@
 # required by sctp.ko
   __bitmap_shift_right
   __bitmap_weight
-  call_rcu
   compat_ip_getsockopt
   compat_ip_setsockopt
   compat_ipv6_getsockopt
@@ -2281,6 +2305,8 @@
   ipv6_getsockopt
   ipv6_setsockopt
   kfree_call_rcu
+  memcg_sockets_enabled_key
+  memory_cgrp_subsys_on_dfl_key
   napi_busy_loop
   net_enable_timestamp
   nf_conntrack_destroy
@@ -2568,7 +2594,6 @@
   i2c_smbus_write_byte_data
 
 # required by watchdog_v2.ko
-  cpu_pm_register_notifier
   cpu_pm_unregister_notifier
   __cpu_present_mask
   disable_percpu_irq
@@ -2620,7 +2645,6 @@
   cfg80211_vendor_cmd_reply
   complete_and_exit
   cpufreq_quick_get_max
-  __cpuhp_remove_state
   cpu_topology
   crypto_aead_setauthsize
   crypto_aead_setkey
@@ -2640,7 +2664,6 @@
   iommu_iova_to_phys
   irq_set_affinity_hint
   mac_pton
-  msleep_interruptible
   netif_tx_stop_all_queues
   netlink_broadcast
   __netlink_kernel_create
@@ -2698,5 +2721,7 @@
   xhci_suspend
 
 # preserved by --additions-only
+  crc32_le
+  simple_strtoull
   vm_map_ram
   vm_unmap_ram

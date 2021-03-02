@@ -1740,7 +1740,6 @@ static int batt_chg_stats_cstr(char *buff, int size,
 						verbose);
 
 		if (soc_next) {
-			len += scnprintf(&buff[len], size - len, "\n");
 			len += ttf_soc_cstr(&buff[len], size - len,
 					    &ce_data->soc_stats,
 					    soc_in, soc_next);
@@ -2593,11 +2592,11 @@ static int msc_logic(struct batt_drv *batt_drv)
 	batt_drv->cc_max = (ramp_cc_max) ? ramp_cc_max :
 			   GBMS_CCCM_LIMITS(profile, temp_idx, vbatt_idx);
 
-	pr_info("MSC_LOGIC cv_cnt=%d ov_cnt=%d temp_idx:%d->%d, vbatt_idx:%d->%d, fv=%d->%d, cc_max=%d\n",
+	pr_debug("MSC_LOGIC cv_cnt=%d ov_cnt=%d temp_idx:%d->%d, vbatt_idx:%d->%d, fv=%d->%d, ui=%d->%d\n",
 		batt_drv->checked_cv_cnt, batt_drv->checked_ov_cnt,
 		batt_drv->temp_idx, temp_idx, batt_drv->vbatt_idx,
-		vbatt_idx, batt_drv->fv_uv, fv_uv,
-		batt_drv->cc_max);
+		vbatt_idx, batt_drv->fv_uv, fv_uv, batt_drv->cc_max,
+		update_interval);
 
 	/* next update */
 	batt_drv->msc_update_interval = update_interval;
@@ -2783,10 +2782,12 @@ msc_logic_done:
 	if (batt_drv->jeita_stop_charging)
 		batt_drv->cc_max = 0;
 
-	pr_info("%s fv_uv=%d cc_max=%d update_interval=%d\n",
+	pr_info("%s msc_state=%d cv_cnt=%d ov_cnt=%d temp_idx:%d, vbatt_idx:%d  fv_uv=%d cc_max=%d update_interval=%d\n",
 		(disable_votes) ? "MSC_DOUT" : "MSC_VOTE",
-		batt_drv->fv_uv,
-		batt_drv->cc_max,
+		batt_drv->msc_state,
+		batt_drv->checked_cv_cnt, batt_drv->checked_ov_cnt,
+		batt_drv->temp_idx, batt_drv->vbatt_idx,
+		batt_drv->fv_uv, batt_drv->cc_max,
 		batt_drv->msc_update_interval);
 
 	 /* google_charger has voted(<=0) on msc_interval_votable and the
@@ -3337,48 +3338,6 @@ DEFINE_SIMPLE_ATTRIBUTE(debug_chg_health_stage_fops, NULL,
 			debug_chg_health_set_stage, "%u\n");
 
 /* ------------------------------------------------------------------------- */
-
-static ssize_t debug_get_fake_temp(struct file *filp,
-					   char __user *buf,
-					   size_t count, loff_t *ppos)
-{
-	struct batt_drv *batt_drv = filp->private_data;
-	char tmp[8];
-
-	mutex_lock(&batt_drv->chg_lock);
-	scnprintf(tmp, sizeof(tmp), "%d\n", batt_drv->fake_temp);
-	mutex_unlock(&batt_drv->chg_lock);
-
-	return simple_read_from_buffer(buf, count, ppos, tmp, strlen(tmp));
-}
-
-static ssize_t debug_set_fake_temp(struct file *filp,
-					 const char __user *user_buf,
-					 size_t count, loff_t *ppos)
-{
-	struct batt_drv *batt_drv = filp->private_data;
-	int ret = 0, val;
-	char buf[8];
-
-	ret = simple_write_to_buffer(buf, sizeof(buf), ppos, user_buf, count);
-	if (ret <= 0)
-		return -EFAULT;
-
-	ret = kstrtoint(buf, 0, &val);
-	buf[ret] = '\0';
-	if (ret < 0)
-		return ret;
-
-	mutex_lock(&batt_drv->chg_lock);
-	batt_drv->fake_temp = val;
-	mutex_unlock(&batt_drv->chg_lock);
-
-	return count;
-}
-
-BATTERY_DEBUG_ATTRIBUTE(debug_fake_temp_fops,
-				debug_get_fake_temp, debug_set_fake_temp);
-
 static ssize_t batt_ctl_chg_stats_actual(struct device *dev,
 					 struct device_attribute *attr,
 					 const char *buf, size_t count)
@@ -4179,9 +4138,12 @@ static int batt_init_fs(struct batt_drv *batt_drv)
 				    batt_drv, &debug_ssoc_uicurve_cstr_fops);
 		debugfs_create_file("force_psy_update", 0400, de,
 				    batt_drv, &debug_force_psy_update_fops);
-		debugfs_create_file("fake_temp", 0600, de,
-				    batt_drv, &debug_fake_temp_fops);
+		debugfs_create_u32("fake_temp", 0600, de,
+				    &batt_drv->fake_temp);
 
+		/* defender */
+		debugfs_create_u32("fake_capacity", 0600, de,
+				    &batt_drv->fake_capacity);
 
 		/* defender */
 		debugfs_create_u32("fake_capacity", 0600, de,
