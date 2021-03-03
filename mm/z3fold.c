@@ -377,6 +377,7 @@ static void free_z3fold_page(struct page *page, bool movable)
 		__ClearPageMovable(page);
 		unlock_page(page);
 	}
+	dec_zone_page_state(page, NR_ZSPAGES);
 	ClearPagePrivate(page);
 	__free_page(page);
 }
@@ -1141,6 +1142,7 @@ retry:
 				goto retry;
 			}
 			page = virt_to_page(zhdr);
+			inc_zone_page_state(page, NR_ZSPAGES);
 			goto found;
 		}
 		bud = FIRST;
@@ -1167,9 +1169,12 @@ retry:
 
 	if (!page)
 		return -ENOMEM;
+	else
+		inc_zone_page_state(page, NR_ZSPAGES);
 
 	zhdr = init_z3fold_page(page, bud == HEADLESS, pool, gfp);
 	if (!zhdr) {
+		dec_zone_page_state(pages[i], NR_ZSPAGES);
 		__free_page(page);
 		return -ENOMEM;
 	}
