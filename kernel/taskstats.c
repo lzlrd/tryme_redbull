@@ -427,7 +427,9 @@ static void sysstats_fill_zoneinfo(struct sys_memstats *stats)
 		if (!populated_zone(zone))
 			continue;
 
+#if IS_ENABLED(CONFIG_ZSMALLOC) || IS_ENABLED(CONFIG_Z3FOLD) || IS_ENABLED(CONFIG_ZBUD)
 		zspages += zone_page_state(zone, NR_ZSPAGES);
+#endif
 		if (!strcmp(zone->name, "DMA")) {
 			stats->dma_nr_free_pages =
 				K(zone_page_state(zone, NR_FREE_PAGES));
